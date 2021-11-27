@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import {
   HomeIcon,
   SearchIcon,
@@ -7,6 +7,7 @@ import {
   RssIcon,
   HeartIcon,
 } from '@heroicons/react/outline';
+import { signOut, useSession } from 'next-auth/react';
 
 const sideBarButtons = [
   { Icon: HomeIcon, name: 'Home' },
@@ -18,9 +19,17 @@ const sideBarButtons = [
 ];
 
 const Sidebar: FC = () => {
+  const { data: session, status } = useSession();
+
   return (
     <div className="text-gray-500 p-5 text-sm border-r border-gray-900">
       <div className="space-y-4">
+        <button
+          className="flex items-center space-x-2 hover:text-white"
+          onClick={() => signOut()}
+        >
+          <p>Logout</p>
+        </button>
         {sideBarButtons.slice(0, 3).map(({ Icon, name }) => (
           <button
             key={name}
