@@ -5,8 +5,8 @@ import {
   LibraryIcon,
   PlusCircleIcon,
   RssIcon,
-  HeartIcon,
 } from '@heroicons/react/outline';
+import { HeartIcon } from '@heroicons/react/solid';
 import { signOut } from 'next-auth/react';
 import useSpotify from 'src/hooks/useSpotify';
 import { useRecoilState } from 'recoil';
@@ -17,8 +17,8 @@ const sideBarButtons = [
   { Icon: SearchIcon, name: 'Search' },
   { Icon: LibraryIcon, name: 'Your Library' },
   { Icon: PlusCircleIcon, name: 'Create Playlist' },
-  { Icon: HeartIcon, name: 'Liked Songs' },
-  { Icon: RssIcon, name: 'Your Episodes' },
+  { Icon: HeartIcon, className: 'text-blue-500', name: 'Liked Songs' },
+  { Icon: RssIcon, className: 'text-green-500', name: 'Your Episodes' },
 ];
 
 const Sidebar: FC = () => {
@@ -29,7 +29,12 @@ const Sidebar: FC = () => {
   const [playlistId, setPlaylistId] = useRecoilState(playlistIdState);
 
   useEffect(() => {
-    spotifyApi.getUserPlaylists().then((data) => setPlaylists(data.body.items));
+    spotifyApi
+      .getUserPlaylists()
+      .then((data) => setPlaylists(data.body.items))
+      .catch((error) =>
+        console.error(`Something went wrong: ${error.message}`)
+      );
   }, [spotifyApi]);
 
   return (
@@ -52,12 +57,12 @@ const Sidebar: FC = () => {
         ))}
         <hr className="border-t-[0.1px] border-gray-900" />
 
-        {sideBarButtons.slice(3).map(({ Icon, name }) => (
+        {sideBarButtons.slice(3).map(({ Icon, name, className }) => (
           <button
             key={name}
             className="flex items-center space-x-2 hover:text-white"
           >
-            <Icon className="h-5 w-5" />
+            <Icon className={`h-5 w-5 ${className}`} />
             <p>{name}</p>
           </button>
         ))}

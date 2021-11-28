@@ -14,7 +14,10 @@ const useSongInfo = () => {
     if (currentTrackId) {
       spotifyApi
         .getTrack(currentTrackId)
-        .then((data) => setSongInfo(data.body));
+        .then((data) => setSongInfo(data.body))
+        .catch((error) =>
+          console.error(`Something went wrong: ${error.message}`)
+        );
     }
   };
 
