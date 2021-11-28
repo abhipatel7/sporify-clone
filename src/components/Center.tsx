@@ -1,23 +1,44 @@
 import { ChevronDownIcon } from '@heroicons/react/outline';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { FC, useEffect, useState } from 'react';
 import { shuffle } from 'lodash';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { colors } from 'src/constants';
+import { playlistState, playlistIdState } from 'src/atoms/playlistAtom';
+import useSpotify from 'src/hooks/useSpotify';
+import Songs from './Songs';
 
 const Center: FC = () => {
   const { data: session } = useSession();
+
+  const spotifyApi = useSpotify();
+
   const [color, setColor] = useState<string>('from-indigo-500');
+  const playlistId = useRecoilValue(playlistIdState);
+  const [playlist, setPlaylist] =
+    useRecoilState<SpotifyApi.SinglePlaylistResponse>(playlistState);
 
   useEffect(() => {
-    const newColor = shuffle(colors).pop();
-    if (newColor) setColor(newColor);
-  }, []);
+    setColor(shuffle(colors).pop()!);
+  }, [playlistId]);
+
+  useEffect(() => {
+    spotifyApi
+      .getPlaylist(playlistId)
+      .then((data) => setPlaylist(data.body))
+      .catch((error) =>
+        console.error(`Something went wrong: ${error.message}`)
+      );
+  }, [spotifyApi, playlistId]);
 
   return (
-    <div className="flex-grow">
-      <header className="absolute top-5 right-8">
-        <div className="flex items-center bg-red-400 space-x-3 opacity-90 hover:opacity-80 cursor-pointer rounded-full p-1 pr-2">
+    <div className="flex-grow h-screen overflow-y-scroll scrollbar-hide">
+      <header className="absolute top-5 right-8 ">
+        <div
+          onClick={() => signOut()}
+          className="flex items-center bg-black space-x-3 opacity-90 hover:opacity-80 cursor-pointer rounded-full p-1 pr-2 text-white"
+        >
           <img
             className="rounded-full w-10 h-10"
             src={session?.user?.image || undefined}
@@ -31,8 +52,22 @@ const Center: FC = () => {
       <section
         className={`flex items-end space-x-7 bg-gradient-to-b to-black h-80 text-white p-8 ${color}`}
       >
-        hello
+        <img
+          src={playlist?.images?.[0]?.url}
+          alt={playlist?.name}
+          className="h-44 w-44 shadow-2xl"
+        />
+        <div>
+          <p>PLAYLIST</p>
+          <h1 className="text-2xl md:text-3xl xl:text-5xl font-bold">
+            {playlist?.name}
+          </h1>
+        </div>
       </section>
+
+      <div>
+        <Songs />
+      </div>
     </div>
   );
 };
